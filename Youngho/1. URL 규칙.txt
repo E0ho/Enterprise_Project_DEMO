@@ -1,0 +1,36 @@
+1. 주소/Product/ /(int)/category/(int)/display/(int)/
+
+https://romand.co.kr/product/ /516/category/1/display/2/
+https://romand.co.kr/product/ /600/category/1/display/2/
+
+https://www.equmal.com/product/ /87/category/1/display/2/
+https://www.equmal.com/product/ /200/category/1/display/2/
+
+https://vastcharm.kr/product/ /4533/category/1/display/2/
+https://vastcharm.kr/product/ /4529/category/1/display/2/
+https://vastcharm.kr/product/ /4527/category/113/display/1/
+
+http://www.arcencielofficial.com/product/ /157/category/24/display/1/
+http://www.arcencielofficial.com/product/ /159/category/24/display/1/
+
+--------------------------------------------------------------------------------------------------------------------
+2. 주소/product/detail.html?product_no=(int)&cate_no=(int)&display_group=(int)
+
+http://rimrim.co.kr/product/detail.html?product_no=200&cate_no=25&display_group=1
+http://rimrim.co.kr/product/detail.html?product_no=197&cate_no=25&display_group=1
+
+https://unipopcorn.com/product/detail.html?product_no=1181&cate_no=1&display_group=3
+https://unipopcorn.com/product/detail.html?product_no=1182&cate_no=1&display_group=3
+https://unipopcorn.com/product/detail.html?product_no=1140&cate_no=1&display_group=3
+
+--------------------------------------------------------------------------------------------------------------------
+3. 주소/goods/goods_view.php?goodsNo=1934
+
+https://www.carrieandshop.co.kr/goods/goods_view.php?goodsNo=1934
+https://www.carrieandshop.co.kr/goods/goods_view.php?goodsNo=1929
+
+--------------------------------------------------------------------------------------------------------------------
+4. 주소/products/상품 이름 
+
+https://kravebeauty.co.kr/products/matcha-hemp-hydrating-cleanser
+https://kravebeauty.co.kr/products/great-barrier-relief

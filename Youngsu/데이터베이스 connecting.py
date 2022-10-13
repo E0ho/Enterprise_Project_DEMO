@@ -55,7 +55,7 @@ arr = [['ozkiz1', 'KU5HdZg4BVXlfoLDEPu6EC'],['nsmall2022','KU5HdZg4BVXlfoLDEPu6E
 # -> 메디큐브의 경우 mod_security 또는 다른 비슷한 서버 시큐리티가 알려진 사용자 봇을 블록 시키기 때문에 html파싱이 안된다..... 어떻게 해야 할까??
 
 for i in range(0, 3) :
-    for k in range(3758, 3760) :
+    for k in range(3756, 3760) :
         list = arr[i][0]
         app_key=arr[i][1]
 
@@ -74,18 +74,19 @@ for i in range(0, 3) :
                     name :string = jsonData.get(data).get("product_name")
                     platform_name :string = arr[i][0]
 
-                    str = f"INSERT INTO platform_item VALUES('{name}', '{code}' ,'{price}','{tax_free_price}','{platform_name}')"
+                    str = f"INSERT IGNORE INTO platform_item VALUES('{name}', '{code}' ,'{price}','{tax_free_price}','{platform_name}')"
 
                     cur.execute(str)
-
+                
                     con.commit()
-                    con.close()
+                    
 
                     print(data, " : ", price, ", product_code", " : ", code)
                 
                 else :
                     continue
-
+        
+                
         else : 
             print(requestdata)
-    con.close()
+con.close()

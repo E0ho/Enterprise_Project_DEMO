@@ -55,7 +55,7 @@ for list in lists:
                     
                     if name_tag != None :
                         name = name_tag.text
-                        price = price_tag.text
+                        price = price_tag
 
                         print('상품명 :' + name, price)
                         worksheet[f'A{i}'] = list
@@ -63,4 +63,4 @@ for list in lists:
                         worksheet[f'H{i}'] = price
                         i = i+1
 
-workbook.save('Youngho/Rule_Page/Medicube.xlsx')
+workbook.save('Youngho/Rule2_Page/Medicube.xlsx')

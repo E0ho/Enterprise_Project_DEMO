@@ -7,8 +7,7 @@ from http.client import ImproperConnectionState
 from urllib.error import URLError, HTTPError
 
 lists = [
-    "http://rimrim.co.kr",
-    "https://themedicube.co.kr/"
+    "https://m.ycloset.com/"
 ]
 
 
@@ -32,7 +31,7 @@ for list in lists:
     # html 규칙 2 (주소/product/detail.html?product_no=(int)&cate_no=(int)&display_group=(int))
 
 
-    for num1 in range(1, 200):
+    for num1 in range(5300, 5500):
         # 상품 판매 링크 가져오기
         header = {'User-Agent': 'Chrome/66.0.3359.181'}
         response = requests.get(
@@ -46,12 +45,14 @@ for list in lists:
             soup = BeautifulSoup(html, 'html.parser')
 
             # 원하는 정보 추출
-            name_tag = soup.select_one('.infoArea .prd_name_wrap')
+            
+            name_tag = soup.select_one('.xans-product-detail .prdname')
             if name_tag == None :
-                name_tag = soup.select_one('.infoArea .name')
-                    
-            price_tag = soup.select_one('.infoArea .price')
-                    
+                name_tag = soup.select_one('.xans-product-detail .name')
+            
+            
+            price_tag = soup.select_one('#span_product_price_text')
+
             if name_tag != None :
                 name = name_tag.text
                 price = price_tag.text
@@ -62,4 +63,4 @@ for list in lists:
                 worksheet[f'H{i}'] = price
                 i = i+1
 
-workbook.save('Youngho/Rule_Page/Rule2.xlsx')
+workbook.save('Youngho/Rule2_Page/Exception/Ycloset.xlsx')

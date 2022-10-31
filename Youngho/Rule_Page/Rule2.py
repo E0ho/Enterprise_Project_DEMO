@@ -2,19 +2,15 @@ import requests
 from bs4 import BeautifulSoup
 import openpyxl
 import time
-
 from email import header
 from http.client import ImproperConnectionState
-import urllib.request
 from urllib.error import URLError, HTTPError
 
 lists = [
     "http://rimrim.co.kr",
-    # "https://themedicube.co.kr/"
+    "https://themedicube.co.kr/"
 ]
 
-# categoryNum
-cate_no = [24, 25, 466]
 
 # 엑셀 생성
 workbook = openpyxl.Workbook()
@@ -34,33 +30,36 @@ for list in lists:
     worksheet['H1'] = '가격'
 
     # html 규칙 2 (주소/product/detail.html?product_no=(int)&cate_no=(int)&display_group=(int))
-    for num3 in range(1, 3):
-        for num2 in cate_no:
-            for num1 in range(1, 200):
 
-                # 상품 판매 링크 가져오기
-                header = {'User-Agent': 'Chrome/66.0.3359.181'}
-                response = requests.get(
-                    f"{list}/product/detail.html?product_no={num1}&cate_no={num2}&display_group={num3}", headers=header)
 
-                # 해당 url 존재 유무 파악
-                if response.status_code == 200:
+    for num1 in range(1, 200):
+        # 상품 판매 링크 가져오기
+        header = {'User-Agent': 'Chrome/66.0.3359.181'}
+        response = requests.get(
+            f"{list}/product/detail.html?product_no={num1}", headers=header)
 
-                    # 파싱
-                    html = response.text
-                    soup = BeautifulSoup(html, 'html.parser')
+        # 해당 url 존재 유무 파악
+        if response.status_code == 200:
 
-                    # 원하는 정보 추출
-                    name = soup.select_one('.infoArea .name').text
-                    # else:
-                    #     name = soup.select_one(
-                    #         '.infoArea .prd_name_wrap')
+            # 파싱
+            html = response.text
+            soup = BeautifulSoup(html, 'html.parser')
 
-                    price = soup.select_one('.infoArea .price').text
-                    print(list, name, price)
-                    worksheet[f'A{i}'] = list
-                    worksheet[f'D{i}'] = name
-                    worksheet[f'H{i}'] = price
-                    i = i+1
+            # 원하는 정보 추출
+            name_tag = soup.select_one('.infoArea .prd_name_wrap')
+            if name_tag == None :
+                name_tag = soup.select_one('.infoArea .name')
+                    
+            price_tag = soup.select_one('.infoArea .price')
+                    
+            if name_tag != None :
+                name = name_tag.text
+                price = price_tag.text
 
-workbook.save('Youngho/Rule_Page/rule2.xlsx')
+                print('상품명 :' + name, price)
+                worksheet[f'A{i}'] = list
+                worksheet[f'D{i}'] = name
+                worksheet[f'H{i}'] = price
+                i = i+1
+
+workbook.save('Youngho/Rule_Page/Rule2.xlsx')

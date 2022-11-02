@@ -11,7 +11,7 @@ import time
 import re
 
 # lists = [
-        # "https://m.ycloset.com/"
+      # "https://m.ycloset.com/"
 #     # "https://m.mainbooth.co.kr/"
 #     # "http://rimrim.co.kr",
 #     # "https://themedicube.co.kr/",
@@ -86,7 +86,7 @@ def htmlParsing(html_url_list, count_html_list) :
         for k in range(180, 205):
         # 상품 판매 링크 가져오기
             header = {'User-Agent': 'Chrome/66.0.3359.181'}
-            url_name = html_url_list[0][i]
+            url_name = html_url_list[i][0]
             requestdata = requests.get(
                 f"{url_name}/product/detail.html?product_no={k}", headers=header)
 
@@ -145,20 +145,15 @@ def htmlParsing(html_url_list, count_html_list) :
 #list형태로 DB에서 받아와서 돌려보자
 ##두개 짝을 지어서 밑의 for문에 넣어줘야 할 듯
 
-def requestJson(list, k, app_key) : 
-
-    requestdata = requests.get(f"https://{list}.cafe24api.com/api/v2/products/{k}?shop_no=1&cafe24_app_key={app_key}")
-    return requestdata
-
 
 #json parsing part
 def jsonParsing(json_url_list, count_json_list):
     for i in range (count_json_list) :
-        for k in range(3000, 3011) :
+        for k in range(3000, 3100) :
             #위의 for문에 따라 parameter를 다르게 줘야함.
             platform = json_url_list[i][0]
             key = json_url_list[i][1]
-            requestdata = requestJson(platform, k, key)
+            requestdata = requests.get(f"https://{platform}.cafe24api.com/api/v2/products/{k}?shop_no=1&cafe24_app_key={key}")
             # type으로 구분하는 걸로 바꿔야 할듯(json은 dict형태로 들어오기 때문에)
             # if type(requestdata)== dict :
             
@@ -183,12 +178,10 @@ def jsonParsing(json_url_list, count_json_list):
                 continue
 
 
-
-
 ## Main
 
 print("DB 연결완료")
-inputByUser()
+# inputByUser()
 print("사용자 입력 완료")
 pullHtmlList()
 print("HTML 파싱 완료")

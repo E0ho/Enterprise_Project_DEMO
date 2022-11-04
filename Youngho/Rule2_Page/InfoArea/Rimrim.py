@@ -61,4 +61,4 @@ for list in lists:
                     worksheet[f'H{i}'] = price
                     i = i+1
 
-workbook.save('Youngho/Rule2_Page/Rimrim.xlsx')
+workbook.save('Youngho/Rule2_Page/InfoArea/Rimrim.xlsx')

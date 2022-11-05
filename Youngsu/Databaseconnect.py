@@ -94,7 +94,7 @@ def htmlParsing() :
                 cur.execute(f"INSERT INTO platform_item VALUES('{name}','{price}','{arr2[0][i]}')")
                 con.commit()
 
-
+                
 # python은 인터프리터 언어이기 때문에 순서를 잘 생각해야 한다.
 
 # arr = [['ozkiz1', 'KU5HdZg4BVXlfoLDEPu6EC'],['mall66','f7kOrfNK8UAn2Z93owrB4C'],['marketb','O7Y0xDwkJRijRHPATmMJnC']]  #DB에서 불러와야함 (DICTIONARY 형태로)

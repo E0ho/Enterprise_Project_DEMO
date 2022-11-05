@@ -7,11 +7,11 @@ from http.client import ImproperConnectionState
 from urllib.error import URLError, HTTPError
 
 lists = [
-    # "https://m.ycloset.com/"
-    # "https://m.mainbooth.co.kr/"
-    # "http://rimrim.co.kr",
-    # "https://themedicube.co.kr/",
-    # "https://www.andar.co.kr"
+    # "https://m.ycloset.com/"         # 5300 ~ 5500
+    # "https://m.mainbooth.co.kr/"     # 3000 ~ 3200
+    # "http://rimrim.co.kr",           # 150 ~ 200
+    # "https://themedicube.co.kr/",    # 1 ~ 1200
+    # "https://www.andar.co.kr"        # 6000 ~ 8000
 ]
 
 
@@ -35,7 +35,7 @@ for list in lists:
     # html 규칙 2 (주소/product/detail.html?product_no=(int)&cate_no=(int)&display_group=(int))
 
 
-    for num1 in range(5300, 5500):
+    for num1 in range(6000,8000):
         # 상품 판매 링크 가져오기
         header = {'User-Agent': 'Chrome/66.0.3359.181'}
         response = requests.get(

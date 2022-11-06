@@ -6,26 +6,19 @@ from email import header
 from http.client import ImproperConnectionState
 from urllib.error import URLError, HTTPError
 
-
 productName_List = ['.prd_name_wrap', '.prdnames', '.name', ]
 productPrice_List = ['.font_Gilroy', '#span_product_price_text', '.price']
 productImg_List = ['.imgArea', '.prdImgView']
 
-list = [productImg_List, productPrice_List, productName_List]
+name_list = [productName_List, productPrice_List, productImg_List]
+
 lists = [
     # "http://rimrim.co.kr",            # 150 ~ 200
     # "https://themedicube.co.kr/",     # 1 ~ 1200 # 상품명
-    "https://m.mainbooth.co.kr/",     # 3000 ~ 3200 # 이미지
+    "https://m.mainbooth.co.kr/",       # 3000 ~ 3200 # 이미지
     # "https://m.ycloset.com/",         # 5300 ~ 5500
     # "https://www.andar.co.kr"         # 6000 ~ 8000 # 상품명
 ]
-
-def select_ProductName(i , j) :
-    productName = frame.select_one(productName_List[name_num])
-    if productName == None :
-        name_num = name_num+1
-        productName = select_ProductName(name_num)
-    return productName
 
 # 상품명 Parsing Class명 규칙 찾기
 def select_ProductName(name_num) :
@@ -39,6 +32,7 @@ def select_ProductName(name_num) :
 def select_ProductPrice(price_num) :
     productPrice = frame.select_one(productPrice_List[price_num])
     if productPrice == None :
+        
         price_num = price_num+1
         productPrice = select_ProductPrice(price_num)
     return productPrice

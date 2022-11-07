@@ -37,7 +37,23 @@ def inputByUser():
             url = pyautogui.prompt("url을 입력해주세요.")
             
             ##정규화해서 platform이름을 가져오기
-            cur.execute(f"INSERT INTO html_url VALUES('{url}','{url}')")
+            p = re.compile("www.\w+", re.MULTILINE)
+            r = re.compile("//\w+", re.MULTILINE)
+
+            platform_name = ""
+            if not (p.findall(url)):
+                platform_name = "".join(r.findall(url))
+                platform_name = platform_name[2:]
+                if platform_name == 'm':
+                    p = re.compile("m.\w+", re.MULTILINE)
+                    platform_name = "".join(p.findall(url))
+                    platform_name = platform_name[2:]
+
+            else:
+                platform_name = "".join(p.findall(url))
+                platform_name = platform_name[4:]
+                
+            cur.execute(f"INSERT INTO html_url VALUES('{url}','{platform_name}')")
             con.commit()
     else:
             header = pyautogui.prompt("json header를 입력해주세요..")
@@ -118,9 +134,9 @@ def htmlParsing(html_url_list, count_html_list) :
                     name = name_tag.text
                     price = price_tag.text
                     price = int(re.sub(r'[^0-9]', '', price))
-                    print(price)
+                    # print(price)
 
-                    print('product_name :' + name, price)
+                    # print('product_name :' + name, price)
 
                 ##정규화해서 platform이름 넣어주기(hlist)
                 cur.execute(f"INSERT INTO platform_item VALUES('{name}','{price}','{html_url_list[0][i]}')")
@@ -149,7 +165,7 @@ def htmlParsing(html_url_list, count_html_list) :
 #json parsing part
 def jsonParsing(json_url_list, count_json_list):
     for i in range (count_json_list) :
-        for k in range(3000, 3100) :
+        for k in range(4124, 4200) :
             #위의 for문에 따라 parameter를 다르게 줘야함.
             platform = json_url_list[i][0]
             key = json_url_list[i][1]
@@ -159,16 +175,25 @@ def jsonParsing(json_url_list, count_json_list):
             
             if requestdata.status_code == 200 :
                 jsonData = requestdata.json()
+
+                
                 for data in jsonData :
-                    if jsonData.get(data).get("price") != None :
+                    if jsonData.get(data).get("product_name") != None :
 
                         price :int = jsonData.get(data).get("price")
                         # code :int = jsonData.get(data).get("product_code")
                         # tax_free_price :int = jsonData.get(data).get("price_excluding_tax")
                         name :string = jsonData.get(data).get("product_name")
+                        img_url :string = jsonData.get(data).get("detail_image")
+                        des :string= jsonData.get(data).get("description")
+
+                        # print(description)
+
                         platform_name :string = json_url_list[i][0]
                         
-                        str = f"INSERT IGNORE INTO platform_item VALUES('{name}','{price}','{platform_name}')"
+                        des = des.replace("'", "&")
+
+                        str = f"INSERT IGNORE INTO platform_item VALUES('{name}','{price}','{platform_name}','{None}','{img_url}','{des}')"
                         cur.execute(str)
                         con.commit()
                         print(data, " : ", price, ", platform_name"," : ", platform_name)
@@ -183,7 +208,7 @@ def jsonParsing(json_url_list, count_json_list):
 print("DB 연결완료")
 # inputByUser()
 print("사용자 입력 완료")
-pullHtmlList()
+# pullHtmlList()
 print("HTML 파싱 완료")
 pullJsonList()
 print("json 파싱 완료")

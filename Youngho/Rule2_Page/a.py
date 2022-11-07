@@ -14,8 +14,8 @@ name_list = [productName_List, productPrice_List, productImg_List]
 
 lists = [
     # "https://romand.co.kr"              # 500
-    "http://rimrim.co.kr",              # 150 ~ 200
-    # "https://m.mainbooth.co.kr/",       # 3000 ~ 3200 
+    # "http://rimrim.co.kr",              # 150 ~ 200
+    "https://m.mainbooth.co.kr/",       # 3000 ~ 3200 
     # "https://m.ycloset.com/",           # 5300 ~ 5500
     # "https://www.andar.co.kr"           # 6000 ~ 8000
     # "https://www.unipopcorn.com"        # 1100
@@ -79,7 +79,7 @@ for list in lists:
     worksheet['J1'] = '이미지'
     
     # html 규칙 2 (주소/product/detail.html?product_no=(int)&cate_no=(int)&display_group=(int))
-    for num1 in range(150,8000):
+    for num1 in range(3000,8000):
         # 상품 판매 링크 가져오기
         header = {'User-Agent': 'Chrome/66.0.3359.181'}
         response = requests.get(f"{list}/product/detail.html?product_no={num1}", headers=header)
@@ -117,21 +117,30 @@ for list in lists:
                     imgDiv= frame.select_one(productImg_List[a[2]])
                     img = imgDiv.select_one('img').get('src')
 
-                sel = frame.select_one('select')
-                option_list = []
-                k = 0
-                for op in sel.find_all('option'):
-                    if k > 1 :
+                # 사이트내 여러 선택사항
+                select_list=[]
+                for sel in frame.find_all('select'):
+                    select_list.append(sel)
+
+                # 사이트 선택사항 갯수
+                max = len(select_list)
+
+                # 선택사항마다의 옵션 추출
+                for v in range(0, max):
+                    option_list = []
+                    for op in select_list[v].find_all('option'):
                         option_list.append([op.text])
-                    k+=1
-                print(option_list)
+                    print(option_list)
+                    # worksheet[f'L{i}'] = option_list
+
+                # print(option_list)
                 print(name, price, img)
                 
                 worksheet[f'A{i}'] = list
                 worksheet[f'D{i}'] = name
                 worksheet[f'H{i}'] = price
                 worksheet[f'J{i}'] = img
-                worksheet[f'L{i}'] = option_list
+                # worksheet[f'L{i}'] = option_list
                 i = i+1
 
 workbook.save('Youngho/Rule2.xlsx')

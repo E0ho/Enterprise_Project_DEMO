@@ -7,11 +7,11 @@ from http.client import ImproperConnectionState
 from urllib.error import URLError, HTTPError
 
 lists = [
-    # "https://m.ycloset.com/"         # 5300 ~ 5500
-    # "https://m.mainbooth.co.kr/"     # 3000 ~ 3200
+    # "https://m.ycloset.com/" ,        # 5300 ~ 5500
+    "https://m.mainbooth.co.kr/",     # 3000 ~ 3200
     # "http://rimrim.co.kr",           # 150 ~ 200
     # "https://themedicube.co.kr/",    # 1 ~ 1200
-    # "https://www.andar.co.kr"        # 6000 ~ 8000
+    "https://www.andar.co.kr"        # 6000 ~ 8000
 ]
 
 
@@ -35,7 +35,7 @@ for list in lists:
     # html 규칙 2 (주소/product/detail.html?product_no=(int)&cate_no=(int)&display_group=(int))
 
 
-    for num1 in range(6000,8000):
+    for num1 in range(3000,8000):
         # 상품 판매 링크 가져오기
         header = {'User-Agent': 'Chrome/66.0.3359.181'}
         response = requests.get(
@@ -50,14 +50,17 @@ for list in lists:
 
             # 원하는 정보 추출
             name_tag = soup.select_one('.infoArea .prd_name_wrap')
-            if name_tag == None :
-                name_tag = soup.select_one('.infoArea .name')
+            # if name_tag == None :
+            #     name_tag = soup.select_one('.infoArea .name')
+            #     print('ssssss')
 
             if name_tag == None :
                 name_tag = soup.select_one('.xans-product-detail .prdnames')
+                print('sssssaaaaaaaaaaas')
 
-            if name_tag == None :
-                name_tag = soup.select_one('.xans-product-detail .name')
+            # if name_tag == None :
+            #     name_tag = soup.select_one('.xans-product-detail .name')
+                
 
 
             price_tag = soup.select_one('.infoArea .font_Gilroy')
@@ -71,6 +74,7 @@ for list in lists:
                 price = price_tag.text
 
                 print('상품명 :' + name, price)
+                
                 worksheet[f'A{i}'] = list
                 worksheet[f'D{i}'] = name
                 worksheet[f'H{i}'] = price

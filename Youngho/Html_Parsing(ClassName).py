@@ -1,26 +1,23 @@
 import requests
 from bs4 import BeautifulSoup
 import openpyxl
-import time
 from email import header
-from http.client import ImproperConnectionState
-from urllib.error import URLError, HTTPError
 
-productName_List = ['product-name','.prd_name_wrap', '.prdnames','.name','h3','h1','h2']
-productPrice_List = ['.font_Gilroy', '#span_product_price_text', '.price']
+
+productName_List = ['h1.-font-ns', 'li.name', 'div.prdnames', 'h1.name', 'h2.info_name','h3.product-name','h2.product_title','h2']
+productPrice_List = ['#span_product_price_text' , 'li.price']
 productImg_List = ['.product_image ','.prdImgView', '.imgArea', '.prd-image-list']
 
-name_list = [productName_List, productPrice_List, productImg_List]
-
 lists = [
-    # "https://romand.co.kr"              # 500
-    # "http://rimrim.co.kr",              # 150 ~ 200
-    "https://m.mainbooth.co.kr/",       # 3000 ~ 3200 
-    # "https://m.ycloset.com/",           # 5300 ~ 5500
-    # "https://www.andar.co.kr"           # 6000 ~ 8000
-    # "https://www.unipopcorn.com"        # 1100
-    # "https://www.nothing-written.com"   # 1700
-    # "https://www.awesomeneeds.com"      # 2300     
+    # "http://com-esta.co.kr/",           #450      (성공)
+    # "https://monicaroom.com",           #14000    (성공)
+    # "https://romand.co.kr",             # 500     (성공)
+    # "http://rimrim.co.kr",              # 150     (성공)
+    # "https://m.mainbooth.co.kr/",       # 3015    (성공)
+    # "https://m.ycloset.com/",           # 5300    (성공)
+    # "https://www.unipopcorn.com",       # 1100    (성공)
+    # "https://www.nothing-written.com",  # 1700    (가격 - Hidden되어 있다)
+    # "https://www.awesomeneeds.com"      # 2300    (성공)   
 ]
 
 # 상품명 Parsing Class명 규칙 찾기
@@ -29,29 +26,32 @@ def select(name_num, price_num, img_num) :
     productName = frame.select_one(productName_List[name_num])
     while productName == None:
         name_num += 1
-        # 예외 처리
+        # 예외 처리 (오류 stop 방지 - None 사용)
         if len(productName_List) <= name_num :
-            frame = soup.select_one('.detailArea')
+            frame = soup.select_one('html body .xans-element-.xans-product.xans-product-detail')
             name_num = 0
-        productName = frame.select_one(productName_List[name_num])
+        else: productName = frame.select_one(productName_List[name_num])
 
     productPrice = frame.select_one(productPrice_List[price_num])
     while productPrice == None:
         price_num += 1
-        # 예외 처리 (SoldOut)
+        # 예외 처리 (오류 stop 방지 - None 사용)
         if len(productPrice_List) <= price_num :
-            break
-        productPrice = frame.select_one(productPrice_List[price_num])
+            productPrice = 'sold out'
+            price_num = 10000
+        else: productPrice = frame.select_one(productPrice_List[price_num])
 
     productImg = frame.select_one(productImg_List[img_num])
     while productImg == None:
         img_num += 1
-        # 예외 처리 (None)
+        # 예외 처리 (오류 stop 방지 - None 사용)
         if len(productImg_List) <= img_num :
-            break
-        productImg = frame.select_one(productImg_List[img_num])
+            productImg = '이미지 없음'
+            img_num = 10000
+        else: productImg = frame.select_one(productImg_List[img_num])
+        
     print(name_num, price_num, img_num)
-    return name_num, price_num, img_num, frame
+    return name_num, price_num, img_num
 
 
 # 엑셀 생성
@@ -60,14 +60,16 @@ workbook = openpyxl.Workbook()
 # 자동적으로 반복
 for list in lists:
 
+    # 현재 platform 확인
     print(list)
 
-    # 해당 사이트 Parsing Class명 규칙 찾기
-    name_num=0
+    # 사이트마다 num 초기화
+    name_num = 0
     price_num = 0
     img_num = 0
     a= None
     global frame
+
     # 엑셀 스타일 시트 생성
     worksheet = workbook.create_sheet('사이트')
 
@@ -78,8 +80,10 @@ for list in lists:
     worksheet['H1'] = '가격'
     worksheet['J1'] = '이미지'
     
+
     # html 규칙 2 (주소/product/detail.html?product_no=(int)&cate_no=(int)&display_group=(int))
-    for num1 in range(3000,8000):
+    for num1 in range(600,99000):
+
         # 상품 판매 링크 가져오기
         header = {'User-Agent': 'Chrome/66.0.3359.181'}
         response = requests.get(f"{list}/product/detail.html?product_no={num1}", headers=header)
@@ -90,26 +94,38 @@ for list in lists:
             # 파싱
             html = response.text
             soup = BeautifulSoup(html, 'html.parser')
-
-            # 필수 정보 추출 (이미지, 상품명, 가격, 사이즈)
-
-            frame = soup.select_one('.xans-product-detail')
             
-            if frame != None :
-                print(num1)
-                # 상품명, 가격, 이미지 조합 찾기 (1번만 실행하기 위한 if문)
-                if a == None:
-                    a = select(name_num, price_num, img_num)
+            # 필수 정보 추출 (이미지, 상품명, 가격, 사이즈)
+            frame = soup.select_one('html body .xans-element-.xans-product.xans-product-detail .infoArea')
 
+            # frame 안에서 infoarea접근하는 애들있고 , table, tbody, tr(1~2)
+            table = frame.find('table')
+            data = []
+            for tr in table.find_all('tr'):
+                data.append(tr)
+            print(data[0].text)
+            print(data[1].text)
+
+            # 판매 중단한 상품 거르기
+            if frame != None :
+                
+            # Select함수에 한번만 접근하기 위한 if 문
+                if a == None:
+                    print(num1)
+                    a = select(name_num, price_num, img_num)
+                    print(a)
+                
                 if len(productName_List) <= a[0] :
-                    name = None
+                    name = '등록되지 않은 Class'
                 else :
                     name = frame.select_one(productName_List[a[0]]).text
+
                 # soldout 예외 처리
                 if len(productPrice_List) <= a[1] :
-                    price = None
+                    price = 'sold out'
                 else :
                     price = frame.select_one(productPrice_List[a[1]]).text
+                        
                 # 예외 상황에도 not Error
                 if len(productImg_List) <= a[2] :
                     img = None
@@ -130,11 +146,13 @@ for list in lists:
                     option_list = []
                     for op in select_list[v].find_all('option'):
                         option_list.append([op.text])
-                    print(option_list)
+                    print(str(option_list))
                     # worksheet[f'L{i}'] = option_list
 
                 # print(option_list)
-                print(name, price, img)
+                print(name , price , img)
+                print('------------------------------------------------')
+                
                 
                 worksheet[f'A{i}'] = list
                 worksheet[f'D{i}'] = name

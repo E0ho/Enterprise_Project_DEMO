@@ -1,4 +1,5 @@
 from urllib import request
+from email import header
 import requests
 from bs4 import BeautifulSoup
 import json
@@ -29,6 +30,49 @@ cur = con.cursor()
 cur.execute("delete from platform_item")
 con.commit()
 
+productName_List = ['h1.-font-ns', 'li.name', 'div.prdnames', 'h1.name', 'h2.info_name','h3.product-name','h2.product_title','h2']
+productPrice_List = ['#span_product_price_text' , 'li.price']
+productImg_List = ['.product_image ','.prdImgView', '.imgArea', '.prd-image-list']
+
+# 상품명 Parsing Class명 규칙 찾기
+def select(name_num, price_num, img_num) :
+    global frame
+
+
+    # Product Name Class 찾기
+    productName = frame.select_one(productName_List[name_num])
+    while productName == None:
+        name_num += 1
+        # 예외 처리 (오류 stop 방지 - None 사용)
+        if len(productName_List) <= name_num :
+            productName = '예외 상황'
+            name_num = 0
+        else: productName = frame.select_one(productName_List[name_num])
+
+    # Product Price Class 찾기
+    productPrice = frame.select_one(productPrice_List[price_num])
+    while productPrice == None:
+        price_num += 1
+        # 예외 처리 (오류 stop 방지 - None 사용)
+        if len(productPrice_List) <= price_num :
+            productPrice = 'sold out'
+            price_num = 10000
+        else: productPrice = frame.select_one(productPrice_List[price_num])
+
+    # Product Img Class 찾기
+    productImg = frame.select_one(productImg_List[img_num])
+    while productImg == None:
+        img_num += 1
+        # 예외 처리 (오류 stop 방지 - None 사용)
+        if len(productImg_List) <= img_num :
+            productImg = '이미지 없음'
+            img_num = 10000
+        else: productImg = frame.select_one(productImg_List[img_num])
+    
+    # 해당 사이트 Class 조합 보여주기
+    print(name_num, price_num, img_num)
+    return name_num, price_num, img_num
+
 def inputByUser():
 
     key = pyautogui.prompt("key 값을 입력해주세요..(없다면 None을 입력해주세요)")
@@ -52,14 +96,13 @@ def inputByUser():
             else:
                 platform_name = "".join(p.findall(url))
                 platform_name = platform_name[4:]
-                
+            
             cur.execute(f"INSERT INTO html_url VALUES('{url}','{platform_name}')")
             con.commit()
     else:
             header = pyautogui.prompt("json header를 입력해주세요..")
             cur.execute(f"INSERT INTO platform_input VALUES('{header}', '{key}')")
             con.commit()
-
 
 def pullHtmlList():
     html_url_list = []
@@ -68,7 +111,7 @@ def pullHtmlList():
     result = cur.fetchall()
     for record in result:
         html_url_list.append(record)
-        print(html_url_list[0][1])
+        print(html_url_list[0][0])
     
     htmlParsing(html_url_list, count_html_list)
 
@@ -96,52 +139,157 @@ def pullJsonList():
     
    
 # 모든 function이 실행되지 않으면 어쩔 수 없이 html 전체를 파싱해서 값을 가져오기(ex 메디큐브)
+# def htmlParsing(html_url_list, count_html_list) :
+#     # list를 일단 1개 받아서 num1으로 main에서 돌리기
+#     for i in range(count_html_list):
+#         for k in range(180, 205):
+#         # 상품 판매 링크 가져오기
+#             header = {'User-Agent': 'Chrome/66.0.3359.181'}
+#             url_name = html_url_list[i][0]
+#             requestdata = requests.get(
+#                 f"{url_name}/product/detail.html?product_no={k}", headers=header)
+
+#             # 해당 url 존재 유무 파악
+#             if requestdata.status_code == 200:
+#                 # 파싱
+#                 html = requestdata.text
+#                 soup = BeautifulSoup(html, 'html.parser')
+
+#                 # 원하는 정보 추출
+#                 name_tag = soup.select_one('.infoArea .prd_name_wrap')
+#                 if name_tag == None :
+#                     name_tag = soup.select_one('.infoArea .name')
+
+#                 if name_tag == None :
+#                     name_tag = soup.select_one('.xans-product-detail .prdnames')
+
+#                 if name_tag == None :
+#                     name_tag = soup.select_one('.xans-product-detail .name')
+
+
+#                 price_tag = soup.select_one('.infoArea .font_Gilroy')
+#                 if price_tag == None :
+#                     price_tag = soup.select_one('.infoArea .price')
+#                 if price_tag == None :
+#                     price_tag = soup.select_one('#span_product_price_text')
+
+#                 if price_tag != None and name_tag != None:
+#                     name = name_tag.text
+#                     price = price_tag.text
+#                     price = re.sub(r'[^0-9]', '', price)
+#                     # print(price)
+
+#                     # print('product_name :' + name, price)
+
+#                 ##정규화해서 platform이름 넣어주기(hlist)
+#                 cur.execute(f"INSERT INTO platform_item VALUES('{name}','{price}','{html_url_list[0][i]}')")
+#                 con.commit()
+
 def htmlParsing(html_url_list, count_html_list) :
-    # list를 일단 1개 받아서 num1으로 main에서 돌리기
+    #list를 일단 1개 받아서 num1으로 main에서 돌리기
     for i in range(count_html_list):
-        for k in range(180, 205):
-        # 상품 판매 링크 가져오기
+        #DB에 저장되어 있는 html url 불러오기
+        url_name = html_url_list[i][0]
+
+        # 사이트마다 num 초기화
+        name_num = 0
+        price_num = 0
+        img_num = 0
+        a= None
+        global frame
+        
+
+        # html 규칙 2 (주소/product/detail.html?product_no=(int)&cate_no=(int)&display_group=(int))
+        for num1 in range(150,550):
+
+            # 상품 판매 링크 가져오기
             header = {'User-Agent': 'Chrome/66.0.3359.181'}
-            url_name = html_url_list[i][0]
-            requestdata = requests.get(
-                f"{url_name}/product/detail.html?product_no={k}", headers=header)
+            response = requests.get(f"{url_name}/product/detail.html?product_no={num1}", headers=header)
 
             # 해당 url 존재 유무 파악
-            if requestdata.status_code == 200:
+            if response.status_code == 200:
+
                 # 파싱
-                html = requestdata.text
+                html = response.text
                 soup = BeautifulSoup(html, 'html.parser')
+                
+                # 필수 정보 추출 (이미지, 상품명, 가격, 사이즈)
+                frame = soup.select_one('html body .xans-element-.xans-product.xans-product-detail')
 
-                # 원하는 정보 추출
-                name_tag = soup.select_one('.infoArea .prd_name_wrap')
-                if name_tag == None :
-                    name_tag = soup.select_one('.infoArea .name')
+                # frame 안에서 infoarea접근하는 애들있고 , table, tbody, tr(1~2)
+                # table = frame.find('table')
+                # data = []
+                # for tr in table.find_all('tr'):
+                #     data.append(tr)
+                # print(data[0].text)
+                # print(data[1].text)
 
-                if name_tag == None :
-                    name_tag = soup.select_one('.xans-product-detail .prdnames')
+                # 판매 중단한 상품 거르기
+                if frame != None :
+                    
+                # 우연히 첫 Select 함수 호출 때가 예외 사이트인 경우 (아주 드물게 사용)
+                    # if a[0] == 10000 or a[1] == 10000 or a[2] == 10000 :
+                    #     a = select(0,0,0)
 
-                if name_tag == None :
-                    name_tag = soup.select_one('.xans-product-detail .name')
+                # Select함수에 한번만 접근하기 위한 if 문
+                    if a == None:
+                        print(num1)
+                        a = select(name_num, price_num, img_num)
+                        print(a)
+                    
+                    if frame.select_one(productName_List[a[0]]) == None:
+                        name = '등록되지 않은 Class'
+                    else :
+                        name = frame.select_one(productName_List[a[0]]).text
+
+                    # soldout 예외 처리
+                    if frame.select_one(productPrice_List[a[1]]) == None :
+                        price = 'sold out'
+                    else :
+                        price = frame.select_one(productPrice_List[a[1]]).text
+                            
+                    # 예외 상황에도 not Error
+                    if frame.select_one(productImg_List[a[2]]) == None :
+                        img = None
+                    else:
+                        imgDiv= frame.select_one(productImg_List[a[2]])
+                        img = imgDiv.select_one('img').get('src')
+
+                    # 사이트내 여러 선택사항
+                    select_list=[]
+                    for sel in frame.find_all('select'):
+                        select_list.append(sel)
+
+                    # 사이트 선택사항 갯수
+                    max = len(select_list)
+
+                    option_list = []
+                    # 선택사항마다의 옵션 추출
+                    for v in range(0, max):
+                        for op in select_list[v].find_all('option'):
+                            option_list.append([op.text])
+                        print(str(option_list))
+                        # worksheet[f'L{i}'] = option_list
+
+                    # print(option_list)
+                    print(option_list)
+                    
+                    if not option_list:
+                        continue
+                    else:
+                        optionstr = str(option_list)
+                        optionstr = optionstr.replace("'", "%")
+
+                    print(name , price , img)
+                    price = re.sub(r'[^0-9]', '', price)
+                    print(name , price , img)
+                    cur.execute(f"INSERT INTO platform_item VALUES('{name}','{price}','{html_url_list[0][i]}','{None}','{img}','{optionstr}')")
+                    con.commit()
+
+                    print('------------------------------------------------')
 
 
-                price_tag = soup.select_one('.infoArea .font_Gilroy')
-                if price_tag == None :
-                    price_tag = soup.select_one('.infoArea .price')
-                if price_tag == None :
-                    price_tag = soup.select_one('#span_product_price_text')
-
-                if price_tag != None and name_tag != None:
-                    name = name_tag.text
-                    price = price_tag.text
-                    price = int(re.sub(r'[^0-9]', '', price))
-                    # print(price)
-
-                    # print('product_name :' + name, price)
-
-                ##정규화해서 platform이름 넣어주기(hlist)
-                cur.execute(f"INSERT INTO platform_item VALUES('{name}','{price}','{html_url_list[0][i]}')")
-                con.commit()
-
+                
 
 # python은 인터프리터 언어이기 때문에 순서를 잘 생각해야 한다.
 
@@ -165,7 +313,7 @@ def htmlParsing(html_url_list, count_html_list) :
 #json parsing part
 def jsonParsing(json_url_list, count_json_list):
     for i in range (count_json_list) :
-        for k in range(4124, 4200) :
+        for k in range(3500, 4350) :
             #위의 for문에 따라 parameter를 다르게 줘야함.
             platform = json_url_list[i][0]
             key = json_url_list[i][1]
@@ -178,7 +326,8 @@ def jsonParsing(json_url_list, count_json_list):
 
                 
                 for data in jsonData :
-                    if jsonData.get(data).get("product_name") != None :
+                    #가격이 음수로 나오는 이상한 값도 존재하고 description이 none이면 안되는 경우가 있어서 조건을 걸어줌.
+                    if float(jsonData.get(data).get("price") or 0) > 0 and jsonData.get(data).get("description") != None:
 
                         price :int = jsonData.get(data).get("price")
                         # code :int = jsonData.get(data).get("product_code")
@@ -186,7 +335,8 @@ def jsonParsing(json_url_list, count_json_list):
                         name :string = jsonData.get(data).get("product_name")
                         img_url :string = jsonData.get(data).get("detail_image")
                         des :string= jsonData.get(data).get("description")
-
+                        # option : string = jsonData.get(data).get("")
+                        # option = re.compile('[0-9]+').findall(des)
                         # print(description)
 
                         platform_name :string = json_url_list[i][0]
@@ -208,7 +358,7 @@ def jsonParsing(json_url_list, count_json_list):
 print("DB 연결완료")
 # inputByUser()
 print("사용자 입력 완료")
-# pullHtmlList()
+pullHtmlList()
 print("HTML 파싱 완료")
 pullJsonList()
 print("json 파싱 완료")

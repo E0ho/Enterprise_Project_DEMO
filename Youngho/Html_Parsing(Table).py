@@ -4,8 +4,8 @@ import openpyxl
 from email import header
 
 lists = [
-    "http://slowacid.com/",             #4000   (성공)
-    "https://escstudio.kr",             # 600   (성공) 
+    "http://slowacid.com/",        #4000   (성공)
+    "https://escstudio.kr",        # 600   (성공) 
 ]
 
 # 자동적으로 반복

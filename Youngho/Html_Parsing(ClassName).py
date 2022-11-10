@@ -92,6 +92,11 @@ for list in lists:
             # 판매 중단한 상품 거르기
             if frame != None :
                 
+
+            # 우연히 첫 Select 함수 호출 때가 예외 사이트인 경우 (아주 드물게 사용)
+                if a[0] == 10000 or a[1] == 10000 or a[2] == 10000 :
+                    a = select(0,0,0)
+            
             # Select함수에 한번만 접근하기 위한 if 문
                 if a == None:
                     print(num1)
@@ -136,7 +141,4 @@ for list in lists:
                 print(name , price , img)
                 print('------------------------------------------------')
 
-                # 우연히 첫 Select 함수 호출 때가 예외 사이트인 경우 (아주 드물게 사용)
-                if a[0] == 10000 or a[1] == 10000 or a[2] == 10000 :
-                    a = select(0,0,0)
-                    
+                

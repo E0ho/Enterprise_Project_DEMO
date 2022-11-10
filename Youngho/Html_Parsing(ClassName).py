@@ -20,18 +20,21 @@ lists = [
     # "https://www.awesomeneeds.com"      # 2300    (성공)   
 ]
 
-# 상품명 Parsing Class명 규칙 찾기
+# 사이트 Parsing Class명 조합 찾기
 def select(name_num, price_num, img_num) :
     global frame
+
+    # Product Name Class 찾기
     productName = frame.select_one(productName_List[name_num])
     while productName == None:
         name_num += 1
         # 예외 처리 (오류 stop 방지 - None 사용)
         if len(productName_List) <= name_num :
-            frame = soup.select_one('html body .xans-element-.xans-product.xans-product-detail')
+            productName = '예외 상황'
             name_num = 0
         else: productName = frame.select_one(productName_List[name_num])
 
+    # Product Price Class 찾기
     productPrice = frame.select_one(productPrice_List[price_num])
     while productPrice == None:
         price_num += 1
@@ -41,6 +44,7 @@ def select(name_num, price_num, img_num) :
             price_num = 10000
         else: productPrice = frame.select_one(productPrice_List[price_num])
 
+    # Product Img Class 찾기
     productImg = frame.select_one(productImg_List[img_num])
     while productImg == None:
         img_num += 1
@@ -49,13 +53,11 @@ def select(name_num, price_num, img_num) :
             productImg = '이미지 없음'
             img_num = 10000
         else: productImg = frame.select_one(productImg_List[img_num])
-        
+    
+    # 해당 사이트 Class 조합 보여주기
     print(name_num, price_num, img_num)
     return name_num, price_num, img_num
 
-
-# 엑셀 생성
-workbook = openpyxl.Workbook()
 
 # 자동적으로 반복
 for list in lists:
@@ -69,20 +71,9 @@ for list in lists:
     img_num = 0
     a= None
     global frame
-
-    # 엑셀 스타일 시트 생성
-    worksheet = workbook.create_sheet('사이트')
-
-    # 엑셀 행 지정
-    i = 2
-    worksheet['A1'] = '해당 상품 사이트'
-    worksheet['D1'] = '상품명'
-    worksheet['H1'] = '가격'
-    worksheet['J1'] = '이미지'
     
-
     # html 규칙 2 (주소/product/detail.html?product_no=(int)&cate_no=(int)&display_group=(int))
-    for num1 in range(600,99000):
+    for num1 in range(450,99000):
 
         # 상품 판매 링크 가져오기
         header = {'User-Agent': 'Chrome/66.0.3359.181'}
@@ -96,15 +87,7 @@ for list in lists:
             soup = BeautifulSoup(html, 'html.parser')
             
             # 필수 정보 추출 (이미지, 상품명, 가격, 사이즈)
-            frame = soup.select_one('html body .xans-element-.xans-product.xans-product-detail .infoArea')
-
-            # frame 안에서 infoarea접근하는 애들있고 , table, tbody, tr(1~2)
-            table = frame.find('table')
-            data = []
-            for tr in table.find_all('tr'):
-                data.append(tr)
-            print(data[0].text)
-            print(data[1].text)
+            frame = soup.select_one('html body .xans-element-.xans-product.xans-product-detail')
 
             # 판매 중단한 상품 거르기
             if frame != None :
@@ -114,20 +97,20 @@ for list in lists:
                     print(num1)
                     a = select(name_num, price_num, img_num)
                     print(a)
-                
-                if len(productName_List) <= a[0] :
+
+                if frame.select_one(productName_List[a[0]]) == None:
                     name = '등록되지 않은 Class'
                 else :
                     name = frame.select_one(productName_List[a[0]]).text
 
                 # soldout 예외 처리
-                if len(productPrice_List) <= a[1] :
+                if frame.select_one(productPrice_List[a[1]]) == None :
                     price = 'sold out'
                 else :
                     price = frame.select_one(productPrice_List[a[1]]).text
                         
                 # 예외 상황에도 not Error
-                if len(productImg_List) <= a[2] :
+                if frame.select_one(productImg_List[a[2]]) == None :
                     img = None
                 else:
                     imgDiv= frame.select_one(productImg_List[a[2]])
@@ -152,13 +135,8 @@ for list in lists:
                 # print(option_list)
                 print(name , price , img)
                 print('------------------------------------------------')
-                
-                
-                worksheet[f'A{i}'] = list
-                worksheet[f'D{i}'] = name
-                worksheet[f'H{i}'] = price
-                worksheet[f'J{i}'] = img
-                # worksheet[f'L{i}'] = option_list
-                i = i+1
 
-workbook.save('Youngho/Rule2.xlsx')
+                # 우연히 첫 Select 함수 호출 때가 예외 사이트인 경우 (아주 드물게 사용)
+                if a[0] == 10000 or a[1] == 10000 or a[2] == 10000 :
+                    a = select(0,0,0)
+                    

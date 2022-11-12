@@ -44,6 +44,7 @@ api_dict = {
 
 import requests
 import json
+from bs4 import BeautifulSoup
 
 # 해당 페이지의 Json 데이터를 파싱하는 함수
 # url과 app_key를 함수의 파라미터로 사용하여 사용자로부터 전달 받는다.
@@ -52,7 +53,7 @@ def isAbleJson(shop_api_name, app_key):
     # shop_api_name 이 none 이면 json 파일이 존재하지 않기 때문에 html 파싱으로 이동.
     if shop_api_name != None:
         # 파싱하는 코드
-        for k in range(10033, 10034):
+        for k in range(129944, 129945):
             requestData = requests.get(f"https://{shop_api_name}.cafe24api.com/api/v2/products/{k}?shop_no=1&cafe24_app_key={app_key}")
             if requestData.status_code == 200:
                 jsonParsing(requestData)
@@ -77,14 +78,39 @@ def jsonParsing(requestData) :
 
     html_list = ['description']
     # print(jsonData)
-    print('*' * 100)
+    print('=' * 170)
     for i in jsonData['product'].keys():
         if i in html_list:
             k = jsonData['product'].get(i)
-            print(k)
-            html_text = '"""' + k + '"""'
-            with open('html_file.html', 'w', encoding='utf-8') as html_file:
-                html_file.write(html_text)
+            #print(k)
+
+            header = {'User-Agent': 'Chrome/66.0.3359.181'}
+            response = requests.get('https://66girls.co.kr//product/detail.html?product_no=129944', headers=header)
+            soup = BeautifulSoup(response.text, 'html.parser')
+            # 필수 정보 추출 (이미지, 상품명, 가격, 사이즈)
+            frame = soup.select_one('html body .xans-element-.xans-product.xans-product-detail')
+            # 사이트내 여러 선택사항
+            #print(frame)
+
+            select_list=[]
+            
+            for sel in frame.find_all('select'):
+                select_list.append(sel)
+
+            # 사이트 선택사항 갯수
+            max = len(select_list)
+            option_list = []
+            
+            # 선택사항마다의 옵션 추출
+            for v in range(0, max):                
+                for op in select_list[v].find_all('option'):
+                    option_list.append([op.text])
+            
+            print(str(option_list))
+
+            # html_text = '"""' + k + '"""'
+            # with open('html_file.html', 'w', encoding='utf-8') as html_file:
+            #     html_file.write(html_text)
             #print (type(k), k)
             # k = k.replace('\r\n', "")
             # print("달라진 k" , k)
@@ -100,8 +126,8 @@ def jsonParsing(requestData) :
         
         # print("==================================")      
         # 
-#isAbleJson("mall66", "f7kOrfNK8UAn2Z93owrB4C")
+isAbleJson("mall66", "f7kOrfNK8UAn2Z93owrB4C")
 #isAbleJson("ozkiz1", "KU5HdZg4BVXlfoLDEPu6EC")
-isAbleJson('marketb', 'O7Y0xDwkJRijRHPATmMJnC')
+#isAbleJson('marketb', 'O7Y0xDwkJRijRHPATmMJnC')
 
     

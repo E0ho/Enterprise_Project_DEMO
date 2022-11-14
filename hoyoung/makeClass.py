@@ -102,12 +102,20 @@ class HTML :
 
                 print(wanted_value_list)
 
-    def option_parsing(self, frame):        
+    def option_parsing(self, product_no):  
+        
+        response = requests.get(f"https://66girls.co.kr//product/detail.html?product_no={product_no}", headers=HTML.header)
+        soup = BeautifulSoup(response.text, 'html.parser')
+        # 필수 정보 추출 (이미지, 상품명, 가격, 사이즈)
+        frame = soup.select_one('html body .xans-element-.xans-product.xans-product-detail')      
 
         select_list=[]
-                
-        for sel in frame.find_all('select'):
-            select_list.append(sel)
+
+        if frame == None:
+            return None         
+        else:
+            for sel in frame.find_all('select'):            
+                select_list.append(sel)
 
         # 사이트 선택사항 갯수
         max = len(select_list)
@@ -119,8 +127,9 @@ class HTML :
                 option_list.append([op.text])
         
         return option_list
+        
 import requests
 from bs4 import BeautifulSoup
 
-html_parsing = HTML()
-html_parsing.parsing_html()
+# html_parsing = HTML()
+# html_parsing.parsing_html()

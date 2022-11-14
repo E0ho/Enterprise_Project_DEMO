@@ -15,7 +15,7 @@ lists = [
     # "https://m.ycloset.com/",           # 5300    (성공)
     # "http://com-esta.co.kr/",           # 450     (성공)
     # "https://monicaroom.com",           # 14000   (성공)
-    # "https://m.mainbooth.co.kr/",       # 3015    (성공)
+    "https://m.mainbooth.co.kr/",       # 3015    (성공)
     # "https://romand.co.kr",             # 500     (성공)
     # "https://www.awesomeneeds.com"      # 2300    (성공)   - 옵션이 없는 사이트 
     # "https://www.nothing-written.com",  # 1700    (가격 - Hidden되어 있다)
@@ -69,7 +69,7 @@ for platformName in lists:
     global frame
     
     # html 규칙 2 (주소/product/detail.html?product_no=(int)&cate_no=(int)&display_group=(int))
-    for num1 in range(5300,99000):
+    for num1 in range(3015,99000):
 
         # 상품 판매 링크 가져오기
         header = {'User-Agent': 'Chrome/66.0.3359.181'}

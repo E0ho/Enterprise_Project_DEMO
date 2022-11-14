@@ -101,8 +101,35 @@ class HTML :
                         wanted_value_list.append(HTML.find_value_overOne(HTML.parsing_list[i], HTML.flag_index[i][0], HTML.flag_index[i][1], soup))
 
                 print(wanted_value_list)
+
+    def option_parsing(self, product_no):  
+        
+        response = requests.get(f"https://66girls.co.kr//product/detail.html?product_no={product_no}", headers=HTML.header)
+        soup = BeautifulSoup(response.text, 'html.parser')
+        # 필수 정보 추출 (이미지, 상품명, 가격, 사이즈)
+        frame = soup.select_one('html body .xans-element-.xans-product.xans-product-detail')      
+
+        select_list=[]
+
+        if frame == None:
+            return None         
+        else:
+            for sel in frame.find_all('select'):            
+                select_list.append(sel)
+
+        # 사이트 선택사항 갯수
+        max = len(select_list)
+        option_list = []
+        
+        # 선택사항마다의 옵션 추출
+        for v in range(0, max):                
+            for op in select_list[v].find_all('option'):
+                option_list.append([op.text])
+        
+        return option_list
+        
 import requests
 from bs4 import BeautifulSoup
 
-html_parsing = HTML()
-html_parsing.parsing_html()
+# html_parsing = HTML()
+# html_parsing.parsing_html()

@@ -101,6 +101,24 @@ class HTML :
                         wanted_value_list.append(HTML.find_value_overOne(HTML.parsing_list[i], HTML.flag_index[i][0], HTML.flag_index[i][1], soup))
 
                 print(wanted_value_list)
+
+    def option_parsing(self, frame):        
+
+        select_list=[]
+                
+        for sel in frame.find_all('select'):
+            select_list.append(sel)
+
+        # 사이트 선택사항 갯수
+        max = len(select_list)
+        option_list = []
+        
+        # 선택사항마다의 옵션 추출
+        for v in range(0, max):                
+            for op in select_list[v].find_all('option'):
+                option_list.append([op.text])
+        
+        return option_list
 import requests
 from bs4 import BeautifulSoup
 

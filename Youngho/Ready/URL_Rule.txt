@@ -20,8 +20,13 @@ https://www.loar.co.kr/
 4. 주소/products/상품 이름 
 -----------------------------------------------------------
 규칙 1) 주소/Product/(상품명)/(int)/category/(int)/display/(int)/
-https://romand.co.kr/product/(상품명)/516/category/1/display/2/
-https://romand.co.kr/product/(상품명)/600/category/1/display/2/
+
+
+https://romand.co.kr/product/516/category/1/display/2/
+
+
+https://romand.co.kr/product/detail.html?product_no=516
+
 
 https://www.equmal.com/product/(상품명)/87/category/1/display/2/
 https://www.equmal.com/product/(상품명)/200/category/1/display/2/
@@ -44,14 +49,7 @@ https://unipopcorn.com/product/detail.html?product_no=1181&cate_no=1&display_gro
 https://unipopcorn.com/product/detail.html?product_no=1182&cate_no=1&display_group=3
 https://unipopcorn.com/product/detail.html?product_no=1140&cate_no=1&display_group=3
 
---------------------------------------------------------------------------------------------------------------------
-규칙 3) 주소/goods/goods_view.php?goodsNo=1934
 
-https://www.carrieandshop.co.kr/goods/goods_view.php?goodsNo=1934
-https://www.carrieandshop.co.kr/goods/goods_view.php?goodsNo=1929
 
---------------------------------------------------------------------------------------------------------------------
-규칙 4) 주소/products/상품 이름 
-
-https://kravebeauty.co.kr/products/matcha-hemp-hydrating-cleanser
-https://kravebeauty.co.kr/products/great-barrier-relief
+1. 특정 플랫폼의 상품 URL에서 / Parsing할 Class name 규칙이 동일할 것이다. (플랫폼 방문시 한번만 찾으면 될 것 이다.) 값 저장해서 사용
+2. 하나의 사이트에서 상품을 담는 URL중 정말 일부 예외 페이지가 있다. (예외처리)

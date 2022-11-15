@@ -1,6 +1,6 @@
-import makeClass as html
+import HTMLClass as html
 
-class Json:
+class ParsingJson:
 
     import requests
     import json
@@ -8,12 +8,12 @@ class Json:
 
     def isAbleJson(self, shop_api_name, app_key): 
         for k in range(129944, 129977):
-            requestData = Json.requests.get(f"https://{shop_api_name}.cafe24api.com/api/v2/products/{k}?shop_no=1&cafe24_app_key={app_key}")
+            requestData = ParsingJson.requests.get(f"https://{shop_api_name}.cafe24api.com/api/v2/products/{k}?shop_no=1&cafe24_app_key={app_key}")
             
             if requestData.status_code == 200:
-                x = html.HTML()
+                x = html.ParsingHTML()
                 print(x.option_parsing(k))
-                Json.jsonParsing(requestData)
+                ParsingJson.jsonParsing(requestData)
    
     def jsonParsing(requestData):         
         
@@ -32,6 +32,6 @@ class Json:
                 #print(frame)
                 
                 
-
-p = Json()
-p.isAbleJson("mall66", "f7kOrfNK8UAn2Z93owrB4C")
+if __name__ == "__main__":
+    p = ParsingJson()
+    p.isAbleJson("mall66", "f7kOrfNK8UAn2Z93owrB4C")

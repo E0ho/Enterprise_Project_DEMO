@@ -3,6 +3,7 @@ class ParsingHTML :
     import requests
     from bs4 import BeautifulSoup
     from email import header
+    import pymysql
 
     productName_List = ['h1.-font-ns', 'li.name', 'div.prdnames', 'h1.name', 'h2.info_name','h3.product-name','h2.product_title','h2']
     productPrice_List = ['#span_product_price_text' , 'li.price']
@@ -13,18 +14,35 @@ class ParsingHTML :
     info_list = []
     op_list = []
 
-    platformLists = [
-        # "http://rimrim.co.kr",              # 150     (성공)
-        "https://www.unipopcorn.com",       # 1100    (성공)
-        # "https://m.ycloset.com/",           # 5300    (성공)
-        # "http://com-esta.co.kr/",           # 450     (성공)
-        # "https://monicaroom.com",           # 14000   (성공)
-        # "https://m.mainbooth.co.kr/",       # 3015    (성공)
-        # "https://romand.co.kr",             # 500     (성공)
-        # "https://www.awesomeneeds.com"      # 2300    (성공)   - 옵션이 없는 사이트 
-        # "https://www.nothing-written.com",  # 1700    (가격 - Hidden되어 있다)
-    ]
+    # platformLists = [
+    #     # "http://rimrim.co.kr",              # 150     (성공)
+    #     "https://www.unipopcorn.com",       # 1100    (성공)
+    #     # "https://m.ycloset.com/",           # 5300    (성공)
+    #     # "http://com-esta.co.kr/",           # 450     (성공)
+    #     # "https://monicaroom.com",           # 14000   (성공)
+    #     # "https://m.mainbooth.co.kr/",       # 3015    (성공)
+    #     # "https://romand.co.kr",             # 500     (성공)
+    #     # "https://www.awesomeneeds.com"      # 2300    (성공)   - 옵션이 없는 사이트 
+    #     # "https://www.nothing-written.com",  # 1700    (가격 - Hidden되어 있다)
+    # ]
 
+    platformLists = []
+
+    def connectDB():
+        # STEP 2: MySQL Connection 연결
+        con = ParsingHTML.pymysql.connect(host='127.0.0.1', user='root', password='fouridiot1234',
+                            db='Capstone', charset='utf8') # 한글처리 (charset = 'utf8')
+
+        # STEP 3: Connection 으로부터 Cursor 생성
+        cur = con.cursor()
+
+        count_html_url = cur.execute("SELECT * FROM html_url")
+        con.commit()
+        ParsingHTML.platformLists = cur.fetchall()
+        
+        # 정확히는 여기서 리턴해줘서 전처리작업실시
+        return ParsingHTML.parsingData()
+        
     # Class Name 조합 찾기 함수 (상품명, 가격, 이미지)
     def find_name_Combination(frame):
         temp = 0
@@ -57,14 +75,14 @@ class ParsingHTML :
             select_list.append(sel)
 
         # 선택사항마다의 옵션 추출
+        option_list = []
         for v in range(0, len(select_list)):
-            option_list = []
+            
             for op in select_list[v].find_all('option'):
                 option_list.append(op.text)
             del option_list[0:2]
-            ParsingHTML.op_list.append(str(option_list))
 
-        
+        return str(option_list)
 
     def parsingData(self):
         # Main문 자동적으로 반복
@@ -73,7 +91,6 @@ class ParsingHTML :
             # 사이트마다 num 초기화
             temp = 0
             index = 0
-
             
             # html 규칙 2 (주소/product/detail.html?product_no=(int)&cate_no=(int)&display_group=(int))
             for num1 in range(1100,99000):
@@ -108,7 +125,7 @@ class ParsingHTML :
                                 ParsingHTML.select(ParsingHTML.index_info, frame)
                                 img = ParsingHTML.info_list[2].select_one('img').get('src')
                                 # 옵션 추출 함수
-                            ParsingHTML.option(frame)
+                            ParsingHTML.op_list.append(ParsingHTML.option(frame))
                             option_num = 0
                             while option_num < len(ParsingHTML.op_list):
                                 print('옵션 : ' + ParsingHTML.op_list[option_num])
@@ -119,7 +136,10 @@ class ParsingHTML :
                                 print('상품명 : ' + ParsingHTML.info_list[0].text)
                                 print('가격 : ' + ParsingHTML.info_list[1].text)
                                 print('이미지 : ' + img)
-                            
+                                
+                                # 받아서 전처리 작업
+                                return_value = [platformName, ParsingHTML.info_list[0].text, ParsingHTML.info_list[1].text, img, str(ParsingHTML.op_list)]
+                                return return_value
                             
 
                         print('-------------------------------------------------------------------------------------------------------')

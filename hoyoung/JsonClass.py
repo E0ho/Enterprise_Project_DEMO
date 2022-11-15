@@ -29,7 +29,9 @@ class ParsingJson:
         count_json_list = cur.execute("SELECT * FROM platform_input")        
         con.commit()
         ParsingJson.json_platform_list = cur.fetchall()
-        isAbleJson(count_json_list)
+
+        # 정확히는 여기서 리턴해줘서 전처리작업실시
+        return ParsingJson.isAbleJson(count_json_list)
 
 
     def isAbleJson(self, count_json_list):
@@ -41,7 +43,8 @@ class ParsingJson:
             for k in range(129944, 129977):
                 requestData = ParsingJson.requests.get(f"https://{platform}.cafe24api.com/api/v2/products/{k}?shop_no=1&cafe24_app_key={key}")
                 
-                if requestData.status_code == 200:
+                if requestData.status_code == 200:   
+                    ParsingJson.return_value = []                 
                     x = html.ParsingHTML()
                     ParsingJson.return_value.append(x.option(k))
                     ParsingJson.jsonParsing(requestData)
@@ -49,9 +52,12 @@ class ParsingJson:
     def jsonParsing(requestData):         
         
         jsonData = requestData.json()
+        for i, j in ParsingJson.wanted_value.items():
+            ParsingJson.return_value.append(jsonData[i].get(j))
 
-        for i in ParsingJson.wanted_value.values():
-            ParsingJson.return_value.append(jsonData['product'][i])
+
+            # 받아서 전처리 작업
+            return ParsingJson.return_value
                 
                 
 if __name__ == "__main__":

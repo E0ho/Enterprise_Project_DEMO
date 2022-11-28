@@ -184,6 +184,9 @@ def pullJsonList():
 #                 ##정규화해서 platform이름 넣어주기(hlist)
 #                 cur.execute(f"INSERT INTO platform_item VALUES('{name}','{price}','{html_url_list[0][i]}')")
 #                 con.commit()
+size_list=[]
+color_list=[]
+other_list=[]
 
 def htmlParsing(html_url_list, count_html_list) :
     #list를 일단 1개 받아서 num1으로 main에서 돌리기
@@ -200,7 +203,7 @@ def htmlParsing(html_url_list, count_html_list) :
         
 
         # html 규칙 2 (주소/product/detail.html?product_no=(int)&cate_no=(int)&display_group=(int))
-        for num1 in range(150,550):
+        for num1 in range(5300,15000):
 
             # 상품 판매 링크 가져오기
             header = {'User-Agent': 'Chrome/66.0.3359.181'}
@@ -256,22 +259,64 @@ def htmlParsing(html_url_list, count_html_list) :
                         img = imgDiv.select_one('img').get('src')
 
                     # 사이트내 여러 선택사항
+                    
+                    
                     select_list=[]
                     for sel in frame.find_all('select'):
                         select_list.append(sel)
 
-                    # 사이트 선택사항 갯수
-                    max = len(select_list)
-
-                    option_list = []
-                    # 선택사항마다의 옵션 추출
-                    for v in range(0, max):
+                    # 선택사항마다의 옵션 추출(모든 옵션 추출)
+                    for v in range(0, len(select_list)):
+                        option_list = []
+                        print('옵션')
                         for op in select_list[v].find_all('option'):
                             option_list.append([op.text])
-                        print(str(option_list))
-                        # worksheet[f'L{i}'] = option_list
+                        
 
-                    # print(option_list)
+                        item_list=[]
+                        for i in range(2, len(option_list)):
+                            
+                            print(option_list[i][0])
+                            
+                            item_list.append(option_list[i][0])
+
+                        #먼저 의류에서의 size, 색상을 구분해보자
+
+                        
+                        ##옵션이 ['- [필수] 옵션을 선택해 주세요 -'], ['-------------------'] 이것 외에 있을 경우 즉 옵션이 존재하는 경우를 예외처리
+                        if(len(item_list)!=0):
+                            
+                            # print("haha",item_list[0])
+                            # print("뭐냐",item_list)
+                            #먼저 알파벳과 숫자만 출력(신발 사이즈 or M, L 와 같은 size)
+                            #맨처음에 나오는 단어를 통해서 색상, size를 구분
+                            size = re.compile('[a-zA-Z0-9]+').findall(item_list[0])
+                            color = re.compile('[가-힣a-zA-Z]+').findall(item_list[0])
+                            
+                            print(str(size))
+                            
+                            # 의류, 신발
+                            # 가정하기로는 size라는 언어가 나오거나 250과 길이가 0-3사이인 string이 들어오면(M,L,XL,XXL와 같은 것 포함) size로 판단
+                            # 그리고 color의 경우에는 한글은 빨강, 영어는 red와 같이 2글자 이상이라고 생각해서 color를 판단
+                            # 이상한 부품이나 엑세서리 옵션이 들어오는 경우는 예외처리가 어렵다.
+                            #첫번째에서 size의 len을 측정하는 이유는 size에 아무것도 안 들어가 있는 경우의 예외처리 그리고 or 뒤의 것은 모두 조건 처리 
+                            if(len(size)>0 and (str(size[0]).lower().strip() == 'size' or str(size[0]).lower().strip() == 'one' or str(size[0]).lower().strip() =='free' or (len(size[0]) <=3 and len(size[0])>=0))) :
+                                    print("size_list에 for문을 이용한 item_list append")
+                                    for k in item_list:
+                                        size_list.append(k)
+                                    print(size_list)
+
+                            elif(len(color)>0 and len(color[0])>=2):
+                                print("color_lits에 for문을 이용한 item_list append")
+                                for l in item_list:
+                                    color_list.append(l)
+                                print(color_list)
+                            else:
+                                print("아무 옵션으로 달아놓고 other_list에 넣어서 db에 저장")
+                                for m in item_list:
+                                    other_list.append(m)
+                                print(other_list)
+
                     print(option_list)
                     
                     if not option_list:
@@ -280,10 +325,12 @@ def htmlParsing(html_url_list, count_html_list) :
                         optionstr = str(option_list)
                         optionstr = optionstr.replace("'", "%")
 
-                    print(name , price , img)
+                    print(name , price , img, optionstr)
                     price = re.sub(r'[^0-9]', '', price)
                     print(name , price , img)
-                    cur.execute(f"INSERT INTO platform_item VALUES('{name}','{price}','{html_url_list[0][i]}','{None}','{img}','{optionstr}')")
+                    k = str(color_list).replace("'",' ')
+                    r = str(size_list).replace("'"," ")
+                    cur.execute(f"INSERT INTO platform_item VALUES('{name}','{price}','{url_name}','{r}','{k}','{None}','{img}')")
                     con.commit()
 
                     print('------------------------------------------------')
@@ -334,19 +381,20 @@ def jsonParsing(json_url_list, count_json_list):
                         # tax_free_price :int = jsonData.get(data).get("price_excluding_tax")
                         name :string = jsonData.get(data).get("product_name")
                         img_url :string = jsonData.get(data).get("detail_image")
-                        des :string= jsonData.get(data).get("description")
+                        # des :string= jsonData.get(data).get("description")
                         # option : string = jsonData.get(data).get("")
                         # option = re.compile('[0-9]+').findall(des)
                         # print(description)
+                        if(json_url_list[0]!=0):
+                            platform_name :string = json_url_list[i][0]
+                        else:
+                            continue
 
-                        platform_name :string = json_url_list[i][0]
-                        
-                        des = des.replace("'", "&")
-
-                        str = f"INSERT IGNORE INTO platform_item VALUES('{name}','{price}','{platform_name}','{None}','{img_url}','{des}')"
+                        str = f"INSERT INTO platform_item VALUES('{name}','{price}','{platform_name}','{None}','{None}','{None}','{img_url}')"
                         cur.execute(str)
                         con.commit()
-                        print(data, " : ", price, ", platform_name"," : ", platform_name)
+                        print("platform_name", " : ", platform_name , ',', data, " : ", price, ", platform_name"," : ", platform_name, "img_url"," : ", img_url)
+                        print("-----------------------------------------------------------------------------")
                     else :
                         continue
             else:

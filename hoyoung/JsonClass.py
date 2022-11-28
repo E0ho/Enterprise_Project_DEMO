@@ -13,7 +13,8 @@ class ParsingJson:
     wanted_value = {
 
         "product" : "price",
-        "product" : "product_name"
+        "product" : "product_name",
+        "product" : "detail_image"
         # 원하는 정보
         
     }
@@ -39,7 +40,7 @@ class ParsingJson:
         return ParsingJson.isAbleJson(count_json_list)
 
 
-    def isAbleJson(self, count_json_list):
+    def isAbleJson(self, count_json_list):        
 
         for i in range(count_json_list) :
             platform = ParsingJson.json_platform_list[i][0]
@@ -47,6 +48,8 @@ class ParsingJson:
             url = ParsingJson.json_platform_list[i][2]
 
             for k in range(129944, 129977):
+                ParsingJson.return_value = []   # 돌때마다 초기화
+                ParsingJson.return_value.append(url)
                 requestData = ParsingJson.requests.get(f"https://{platform}.cafe24api.com/api/v2/products/{k}?shop_no=1&cafe24_app_key={key}")
                 ParsingJson.time.sleep(1)
                 
@@ -55,7 +58,7 @@ class ParsingJson:
    
     def jsonParsing(requestData, product_no, url):  
 
-        ParsingJson.return_value = []    
+        
         jsonData = requestData.json()
         for i, j in ParsingJson.wanted_value.items():
             ParsingJson.return_value.append(jsonData[i].get(j))
@@ -73,9 +76,10 @@ class ParsingJson:
             
             # 필수 정보 추출 (이미지, 상품명, 가격, 사이즈)
             frame = soup.select_one('html body .xans-element-.xans-product.xans-product-detail')
-                     
-        html_ = html.ParsingHTML()
-        ParsingJson.return_value.append(html_.option())
+
+            html_ = html.ParsingHTML()
+            ParsingJson.return_value.append(html_.option(frame))        
+       
 
 
         # 받아서 전처리 작업

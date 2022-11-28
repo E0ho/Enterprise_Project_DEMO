@@ -53,7 +53,8 @@ def isAbleJson(shop_api_name, app_key):
     # shop_api_name 이 none 이면 json 파일이 존재하지 않기 때문에 html 파싱으로 이동.
     if shop_api_name != None:
         # 파싱하는 코드
-        for k in range(129944, 129945):
+        for k in range(129935, 129945):
+            print('mall66')
             requestData = requests.get(f"https://{shop_api_name}.cafe24api.com/api/v2/products/{k}?shop_no=1&cafe24_app_key={app_key}")
             if requestData.status_code == 200:
                 jsonParsing(requestData)
@@ -72,17 +73,17 @@ def jsonParsing(requestData) :
     
     jsonData = requestData.json()
     # print('==================================')
-    print(jsonData)
+    # print(jsonData)
     # print(type(jsonData))
     # print(jsonData.get('price'))
 
-    html_list = ['description']
+    html_list = ['price', 'product_name']
     # print(jsonData)
     print('=' * 170)
     for i in jsonData['product'].keys():
         if i in html_list:
             k = jsonData['product'].get(i)
-            #print(k)
+            print(k)
 
             header = {'User-Agent': 'Chrome/66.0.3359.181'}
             response = requests.get('https://66girls.co.kr//product/detail.html?product_no=129944', headers=header)
@@ -126,6 +127,8 @@ def jsonParsing(requestData) :
         
         # print("==================================")      
         # 
+
+print('mall66')
 isAbleJson("mall66", "f7kOrfNK8UAn2Z93owrB4C")
 #isAbleJson("ozkiz1", "KU5HdZg4BVXlfoLDEPu6EC")
 #isAbleJson('marketb', 'O7Y0xDwkJRijRHPATmMJnC')

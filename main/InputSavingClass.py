@@ -38,7 +38,7 @@ class InputSaving:
                 platform_name = platform_name[4:]
         
         if key != "None":
-                InputSaving.cur.execute(f"INSERT INTO platform_input VALUES('{header}', '{key}', '{url}')")
+                InputSaving.cur.execute(f"INSERT INTO platform_input VALUES('{header}', '{key}', '{url}', '{platform_name}')")
                 InputSaving.con.commit()     
         else:
                 InputSaving.cur.execute(f"INSERT INTO html_url VALUES('{url}','{platform_name}')")

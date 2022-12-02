@@ -117,27 +117,30 @@ class DBClass:
         
         item_name = return_value[1].replace("'", '')
         item_price = price.replace("'",'')
-        platform_name = return_value[0][1].replace("'",'')
+        platform_name = return_value[0].replace("'",'') # 고려해주세요 0 -> i
 
+        print("ㅁ안러낭", platform_name)
         op_list = "".join(str(option_list)).replace("'", '')
         
         list=[]
-        for first in option_list:
-            list.append(first)
-        # print(list[1])
         a = None
         b = None
         c = None
-        if len(list) >=1 :
-            c = "".join(str(list[0])).replace("'",'')
-        if len(list) >1 :
-            a = "".join(str(list[1])).replace("'",'')
-        if len(list)>2:
-            b = "".join(str(list[2])).replace("'",'')
+        if option_list:
+            for first in option_list:
+                list.append(first)
+            # print(list[1])
+            
+            if len(list) >=1 :
+                c = "".join(str(list[0])).replace("'",'')
+            if len(list) >1 :
+                a = "".join(str(list[1])).replace("'",'')
+            if len(list)>2:
+                b = "".join(str(list[2])).replace("'",'')
 
-        print("haahhaahhahahaha", type(option_list))
-        DBClass.cur.execute(f"INSERT INTO platform_item VALUES('{item_name}','{item_price}','{platform_name}','{a}','{b}','{c}','{return_value[3]}')")
+        print("option_list의 타입은 ", type(option_list))
+        DBClass.cur.execute(f"INSERT INTO platform_item (item_name, item_price, platform_name, item_opt1, item_opt2, item_opt3, img_url) VALUES('{item_name}','{item_price}','{platform_name}','{a}','{b}','{c}','{return_value[3]}')")
         DBClass.con.commit()
 
-    print('------------------------------------------------')
+    print('-' * 150)
 
